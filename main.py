@@ -5,6 +5,8 @@ import random as rn
 from scripts.player import Player
 from scripts.brick import Brick
 
+# testing change
+
 class Game:
     TILE_SIZE = 16
     SCREEN_WIDTH = 28 * TILE_SIZE *2
