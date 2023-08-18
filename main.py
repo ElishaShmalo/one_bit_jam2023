@@ -31,7 +31,7 @@ class Game:
         }
         pg.mixer.music.load("assets/sounds/bg_sound.mp3")
         pg.mixer.music.set_volume(0.15)
-        self.sounds["jump"].set_volume(0.1)
+        self.sounds["jump"].set_volume(0.07)
         self.sounds["dash"].set_volume(0.1)
         self.sounds["die"].set_volume(0.1)
 
@@ -45,6 +45,10 @@ class Game:
             "player_score": pg.font.Font(None, 30),
             "instructions": pg.font.Font(None, 21),
         }
+
+        with open("utils/high_score.txt", "r") as f:
+            self.high_score = int(f.read())
+        self.high_score_txt = self.fonts["instructions"].render(f"High Score: {self.high_score}", False, (255, 255, 255))
 
         self.instruction_dist = 50 - 8 # grid
         self.instructions = {
@@ -88,6 +92,8 @@ class Game:
         self.spawn_plat_timer = self.spawn_plat_every * self.FPS 
         self.offset_speed = 0.75
 
+        self.high_score_txt = self.fonts["instructions"].render(f"High Score: {self.high_score}", False, (255, 255, 255))
+
     def quit(self):
         pg.mixer.quit()
         pg.font.quit()
@@ -102,6 +108,7 @@ class Game:
             for event in pg.event.get():
                 if event.type == pg.QUIT:
                     self.running = False
+                    self.update_high_score()
                     self.quit()
                 elif event.type == pg.KEYDOWN:
                     if event.key == pg.K_UP:
@@ -168,6 +175,9 @@ class Game:
             self.spawn_plat_timer = round(self.spawn_plat_every, 3) * self.FPS
             self.make_platforms(2)
             self.make_platforms(1)
+        
+        if round(self.player.score) == self.high_score:
+            self.high_score_txt = self.fonts["instructions"].render(f"NEW HIGH SCORE!", False, (255, 255, 255))
     
     def spawn_platform(self, loc, p_type):
         grid_loc = [int(loc[0]//self.TILE_SIZE), int(loc[1]//self.TILE_SIZE)]
@@ -178,6 +188,12 @@ class Game:
         for rel_location in self.platform_types[p_type]["shape"]:
             self.bricks[(grid_loc[0]+rel_location[0], grid_loc[1]+rel_location[1])] = Brick(self, (grid_loc[0]+rel_location[0], grid_loc[1]+rel_location[1]))
     
+    def update_high_score(self):
+        if round(self.player.score) > self.high_score:
+            self.high_score = round(self.player.score)
+            with open("utils/high_score.txt", "w") as f:
+                f.write(str(round(self.player.score)))
+
     def make_platforms(self, num=1):
         section_sizes = self.WIDTH // (num)
         for i in range(num):
@@ -204,6 +220,8 @@ class Game:
             self.display.blit(self.instructions[loc], (loc[0] - self.offset[0], loc[1]))
 
         self.player.show()
+
+        self.display.blit(self.high_score_txt, (5, 5))
         
         self.win.blit(pg.transform.scale2x(self.display), (0, 0))
         pg.display.update()
