@@ -44,11 +44,12 @@ class Game:
         self.fonts = {
             "player_score": pg.font.Font(None, 30),
             "instructions": pg.font.Font(None, 21),
+            "high score": pg.font.Font(None, 17),
         }
 
         with open("utils/high_score.txt", "r") as f:
             self.high_score = int(f.read())
-        self.high_score_txt = self.fonts["instructions"].render(f"High Score: {self.high_score}", False, (255, 255, 255))
+        self.high_score_txt = self.fonts["high score"].render(f"High Score: {self.high_score}", False, (255, 255, 255))
 
         self.instruction_dist = 50 - 8 # grid
         self.instructions = {
@@ -92,7 +93,7 @@ class Game:
         self.spawn_plat_timer = self.spawn_plat_every * self.FPS 
         self.offset_speed = 0.75
 
-        self.high_score_txt = self.fonts["instructions"].render(f"High Score: {self.high_score}", False, (255, 255, 255))
+        self.high_score_txt = self.fonts["high score"].render(f"High Score: {self.high_score}", False, (255, 255, 255))
 
     def quit(self):
         pg.mixer.quit()
@@ -177,7 +178,7 @@ class Game:
             self.make_platforms(1)
         
         if round(self.player.score) == self.high_score:
-            self.high_score_txt = self.fonts["instructions"].render(f"NEW HIGH SCORE!", False, (255, 255, 255))
+            self.high_score_txt = self.fonts["high score"].render(f"NEW HIGH SCORE!", False, (255, 255, 255))
     
     def spawn_platform(self, loc, p_type):
         grid_loc = [int(loc[0]//self.TILE_SIZE), int(loc[1]//self.TILE_SIZE)]
