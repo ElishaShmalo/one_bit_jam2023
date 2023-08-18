@@ -4,6 +4,7 @@ import random as rn
 
 from scripts.player import Player
 from scripts.brick import Brick
+import os
 
 class Game:
     TILE_SIZE = 16
@@ -186,5 +187,6 @@ class Game:
         pg.display.update()
 
 if __name__ == "__main__":
+    application_path = os.path.dirname(sys.executable)
     game = Game()
     game.run()
