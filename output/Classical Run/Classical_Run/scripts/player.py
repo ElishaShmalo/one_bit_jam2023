@@ -45,6 +45,7 @@ class Player(Entity):
 
         if self.rect.y > self.game.HEIGHT + 5 * self.game.TILE_SIZE:
             self.game.sounds["die"].play()
+            self.game.update_high_score()
             self.game.reset()
         
     
@@ -68,6 +69,6 @@ class Player(Entity):
     def show(self):
         super().show(3)
         score_txt : pg.Surface = self.game.fonts["player_score"].render(f"{round(self.score)}", False, (255, 255, 255))
-        self.game.display.blit(score_txt, (self.game.WIDTH // 2 - score_txt.get_width() // 4, 10))
+        self.game.display.blit(score_txt, (self.game.WIDTH // 2 - score_txt.get_width() // 4, 5))
         # pg.draw.rect(self.game.display, "red", self.rect, 1)
 
