@@ -109,6 +109,7 @@ class Game:
                     elif event.key == pg.K_SPACE:
                         self.player.blink()
                     elif event.key == pg.K_DOWN:
+                        self.player.vel[1] = 0
                         self.player.sinking = True
 
                 elif event.type == pg.KEYUP:
