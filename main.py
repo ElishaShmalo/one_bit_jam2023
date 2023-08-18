@@ -42,7 +42,17 @@ class Game:
             self.imgs[key].set_colorkey(0)
         #     self.imgs[key].set_colorkey((255, 255, 255))
         self.fonts = {
-            "player_score": pg.font.Font(None, 30)
+            "player_score": pg.font.Font(None, 30),
+            "instructions": pg.font.Font(None, 21),
+        }
+
+        self.instruction_dist = 50 - 8 # grid
+        self.instructions = {
+            (self.TILE_SIZE * 8, 25): self.fonts["instructions"].render("Use the ARROW keys to move, jump and quick-fall.", False, (255, 255, 255)),
+            (self.TILE_SIZE * (8 + self.instruction_dist), 25): self.fonts["instructions"].render("Just FYI, you have a double jump :D", False, (255, 255, 255)),
+            (self.TILE_SIZE * (8 + (2 * self.instruction_dist)), 25): self.fonts["instructions"].render("Oh! And you can dash with SPACE.", False, (255, 255, 255)),
+            (self.TILE_SIZE * (8 + (3 * self.instruction_dist)), 25): self.fonts["instructions"].render("Double Oh! You can jump out of your dash if you haven't jumped yet and you time it right.", False, (255, 255, 255)),
+            (self.TILE_SIZE * (8 + (4 * self.instruction_dist)), 25): self.fonts["instructions"].render("NOW RUN!!", False, (255, 255, 255)),
         }
 
         self.reset()
@@ -110,6 +120,7 @@ class Game:
                         self.player.blink()
                     elif event.key == pg.K_DOWN:
                         self.player.sinking = True
+                        self.player.vel[1] = max(0, self.player.vel[1])
 
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_RIGHT:
@@ -143,6 +154,14 @@ class Game:
                 bricks_to_remove.append(brick)
         for brick in bricks_to_remove:
             del self.bricks[brick] 
+        
+        if len(self.instructions) > 0:
+            isnt_to_remove = []
+            for inst in self.instructions:
+                if inst[0] + self.instructions[inst].get_width() - self.offset[0] < -2 * self.TILE_SIZE:
+                    isnt_to_remove.append(inst)
+            for inst in isnt_to_remove:
+                del self.instructions[inst] 
         
         self.spawn_plat_timer -= 1
         if self.spawn_plat_timer <= 0:
@@ -180,6 +199,9 @@ class Game:
 
         for plat in self.bricks.values():
             plat.show()
+
+        for loc in self.instructions:
+            self.display.blit(self.instructions[loc], (loc[0] - self.offset[0], loc[1]))
 
         self.player.show()
         
