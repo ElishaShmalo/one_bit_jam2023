@@ -18,6 +18,8 @@ class Game:
         pg.mixer.init()
         pg.font.init()
         self.win = pg.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pg.SCALED, vsync=1)
+        pg.display.set_caption("Classical Run")
+        pg.display.set_icon(pg.image.load("assets\\graphics\\general\\icon.ico"))
         self.display = pg.Surface((self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2), pg.SRCALPHA)
         self.clock = pg.time.Clock()
 
