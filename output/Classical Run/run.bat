@@ -1,2 +1,2 @@
-chdir "Classical Run"
+chdir "Classical_Run"
 @start "" ".\Classical Run.exe"
