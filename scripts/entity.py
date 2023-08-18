@@ -21,9 +21,10 @@ class Entity:
 
         self.collidable = True
         self.grounded = False
+        self.sinking = False
 
     def update(self):
-        self.vel[1] = min(self.terminal_vel, self.vel[1]+self.GRAVITY)
+        self.vel[1] = min(self.terminal_vel + (5 * self.sinking), self.vel[1]+self.GRAVITY)
 
         self.move_up = self.vel[1] < 0
         self.move_down = self.vel[1] > 0

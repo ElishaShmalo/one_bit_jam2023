@@ -105,6 +105,8 @@ class Game:
                         self.player.vel[0] = -self.player.walk_speed
                     elif event.key == pg.K_SPACE:
                         self.player.blink()
+                    elif event.key == pg.K_DOWN:
+                        self.player.sinking = True
 
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_RIGHT:
@@ -115,6 +117,8 @@ class Game:
                         if not self.player.move_right:
                             self.player.move_left = False
                             self.player.vel[0] = 0
+                    elif event.key == pg.K_DOWN:
+                        self.player.sinking = False
                         
             self.update()
             self.draw()
@@ -122,13 +126,12 @@ class Game:
     def update(self):
         self.offset[0] += self.offset_speed
         if self.offset_speed < self.MAX_OFFSET_SPEED:
-            self.offset_speed += 0.0001
             self.player.blink_speed = min(self.player.blink_speed + 0.0001, self.player.MAX_BLINK_SPEED)
-            self.offset_speed = min(self.offset_speed, self.MAX_OFFSET_SPEED)
-            self.player.walk_speed =  max(self.player.walk_speed, self.offset_speed + 1)
+            self.offset_speed = min(self.offset_speed + 0.00025, self.MAX_OFFSET_SPEED)
+            self.player.walk_speed =  max(self.player.walk_speed, round(self.offset_speed) + 2)
         self.player.score += self.offset_speed / (0.5*self.FPS)
         
-        self.spawn_plat_every = max(1.75, self.spawn_plat_every - 0.001)
+        self.spawn_plat_every = max(1.75, self.spawn_plat_every - 0.0005)
         self.player.update()
 
         bricks_to_remove = []

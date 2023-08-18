@@ -37,7 +37,7 @@ class Player(Entity):
             self.rect.y -= self.vel[1]
         elif self.blinking == 0:
             self.vel[1] = -4
-            self.air_time = 0
+            self.air_time = -5
         else:
             self.vel[0] = self.walk_speed * (-self.move_left + self.move_right)
         self.blink_cooldown = max(0, self.blink_cooldown-1)
