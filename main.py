@@ -16,27 +16,39 @@ class Game:
     def __init__(self) -> None:
         pg.init()
         pg.mixer.init()
-        self.win = pg.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT))
+        pg.font.init()
+        self.win = pg.display.set_mode((self.SCREEN_WIDTH, self.SCREEN_HEIGHT), pg.SCALED, vsync=1)
         self.display = pg.Surface((self.SCREEN_WIDTH/2, self.SCREEN_HEIGHT/2), pg.SRCALPHA)
         self.clock = pg.time.Clock()
-        self.running = True
-
-        self.offset = [0, 0]
 
         self.sounds = {
             "jump": pg.mixer.Sound("assets/sounds/jump.wav"),
             "die": pg.mixer.Sound("assets/sounds/die.wav"),
             "dash": pg.mixer.Sound("assets/sounds/dash.wav"),
         }
+        pg.mixer.music.load("assets/sounds/bg_sound.mp3")
+        pg.mixer.music.set_volume(0.15)
         self.sounds["jump"].set_volume(0.1)
         self.sounds["dash"].set_volume(0.1)
+        self.sounds["die"].set_volume(0.1)
 
         self.imgs = {
             "player_idle": pg.image.load("assets\\graphics\\player\\idle\\1.png").convert()
-        }
+        }        
         for key in self.imgs:
             self.imgs[key].set_colorkey(0)
         #     self.imgs[key].set_colorkey((255, 255, 255))
+        self.fonts = {
+            "player_score": pg.font.Font(None, 30)
+        }
+
+        self.reset()
+
+    
+    def reset(self):
+        self.running = True
+
+        self.offset = [0, 0]
 
         self.bricks = {
             (1, 15): Brick(self, (1, 15)),
@@ -59,16 +71,18 @@ class Game:
         self.make_platforms(3)
 
         self.player = Player(self, (299, 143), self.imgs["player_idle"], 5)
-        self.spawn_plat_every = 2.25 # sec
+        self.spawn_plat_every = 2.5 # sec
         self.spawn_plat_timer = self.spawn_plat_every * self.FPS 
         self.offset_speed = 0.75
 
     def quit(self):
-        pg.quit()
         pg.mixer.quit()
+        pg.font.quit()
+        pg.quit()
         sys.exit()
 
     def run(self):
+        pg.mixer.music.play(-1)
         while self.running:
             self.clock.tick(self.FPS)
 
@@ -91,7 +105,6 @@ class Game:
                         self.player.vel[0] = -self.player.walk_speed
                     elif event.key == pg.K_SPACE:
                         self.player.blink()
-                        print(self.offset_speed)
 
                 elif event.type == pg.KEYUP:
                     if event.key == pg.K_RIGHT:
@@ -109,15 +122,18 @@ class Game:
     def update(self):
         self.offset[0] += self.offset_speed
         if self.offset_speed < self.MAX_OFFSET_SPEED:
-            self.offset_speed += 0.0005
+            self.offset_speed += 0.0001
+            self.player.blink_speed = min(self.player.blink_speed + 0.0001, self.player.MAX_BLINK_SPEED)
             self.offset_speed = min(self.offset_speed, self.MAX_OFFSET_SPEED)
+            self.player.walk_speed =  max(self.player.walk_speed, self.offset_speed + 1)
+        self.player.score += self.offset_speed / (0.5*self.FPS)
         
-        self.spawn_plat_every = max(2, self.spawn_plat_every - 0.001)
+        self.spawn_plat_every = max(1.75, self.spawn_plat_every - 0.001)
         self.player.update()
 
         bricks_to_remove = []
         for brick in self.bricks:
-            if (brick[0] * self.TILE_SIZE) - self.offset[0] < 5:
+            if (brick[0] * self.TILE_SIZE) - self.offset[0] < -2*self.TILE_SIZE:
                 bricks_to_remove.append(brick)
         for brick in bricks_to_remove:
             del self.bricks[brick] 
@@ -126,6 +142,7 @@ class Game:
         if self.spawn_plat_timer <= 0:
             self.spawn_plat_timer = round(self.spawn_plat_every, 3) * self.FPS
             self.make_platforms(2)
+            self.make_platforms(1)
     
     def spawn_platform(self, loc, p_type):
         grid_loc = [int(loc[0]//self.TILE_SIZE), int(loc[1]//self.TILE_SIZE)]
@@ -137,9 +154,10 @@ class Game:
             self.bricks[(grid_loc[0]+rel_location[0], grid_loc[1]+rel_location[1])] = Brick(self, (grid_loc[0]+rel_location[0], grid_loc[1]+rel_location[1]))
     
     def make_platforms(self, num=1):
-        for _ in range(num):
+        section_sizes = self.WIDTH // (num)
+        for i in range(num):
             plat_type = rn.choice(list(self.platform_types.keys()))
-            loc = [rn.randint(int(self.offset[0]+self.WIDTH+6), int(self.offset[0]+(2*self.WIDTH-6))), rn.randint(self.HEIGHT//3, self.HEIGHT)]
+            loc = [rn.randint(int(self.offset[0]+self.WIDTH) + (section_sizes * i), int(self.offset[0]+(self.WIDTH)) + (section_sizes * (i+1))), rn.randint(self.HEIGHT//2.5, self.HEIGHT)]
             if plat_type == "tower":
                 loc[1] = self.HEIGHT // 2
             elif plat_type == "pit":

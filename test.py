@@ -1,3 +1,5 @@
-x = {1: 1, 4: 2}
+x = {4:1, 5:3, 3:2}
 y = [4, 3]
-print(list(x))
+for val in y:
+    del x[val]
+print(x)
